@@ -1,0 +1,77 @@
+[
+    {
+        "nombre": "zarymar",
+        "puntuacion": 225,
+        "fecha": "07-07-2025"
+    },
+    {
+        "nombre": "omar",
+        "puntuacion": 25,
+        "fecha": "07-07-2025"
+    },
+    {
+        "nombre": "franco col",
+        "puntuacion": 325,
+        "fecha": "07-07-2025"
+    },
+    {
+        "nombre": "raquel",
+        "puntuacion": 125,
+        "fecha": "07-07-2025"
+    },
+    {
+        "nombre": "jhonny",
+        "puntuacion": 225,
+        "fecha": "07-07-2025"
+    },
+    {
+        "nombre": "Ana",
+        "puntuacion": 400,
+        "fecha": "07-07-2025"
+    },
+    {
+        "nombre": "micaela",
+        "puntuacion": 25,
+        "fecha": "07-07-2025"
+    },
+    {
+        "nombre": "jesica",
+        "puntuacion": 25,
+        "fecha": "07-07-2025"
+    },
+    {
+        "nombre": "prueba",
+        "puntuacion": 975,
+        "fecha": "07-07-2025"
+    },
+    {
+        "nombre": "maria",
+        "puntuacion": 25,
+        "fecha": "07-07-2025"
+    },
+    {
+        "nombre": "manuel",
+        "puntuacion": -75,
+        "fecha": "07-07-2025"
+    },
+    {
+        "nombre": "maia",
+        "puntuacion": 1300,
+        "fecha": "08-07-2025"
+    },
+    {
+        "nombre": "gimena",
+        "puntuacion": 700,
+        "fecha": "08-07-2025"
+    },
+    {
+        "nombre": "andres",
+        "puntuacion": 675,
+        "fecha": "08-07-2025"
+    },
+    {
+        "nombre": "sara",
+        "puntuacion": 1275,
+        "fecha": "08-07-2025"
+    }
+]

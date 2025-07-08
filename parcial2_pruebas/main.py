@@ -1,0 +1,80 @@
+import pygame
+from Constantes import *
+from menu import *
+from funciones import *
+from juego import*
+from ajustes import*
+from terminado import*
+from rankings import*
+
+pygame.init()
+pygame.display.set_caption("PREGUNTADOS")
+icono = pygame.image.load("brain.png")
+pygame.display.set_icon(icono)
+pantalla = pygame.display.set_mode(PANTALLA)
+
+lista_preguntas = []
+
+if leer_csv_preguntas("preguntas_cultura_general.csv", lista_preguntas):
+    mezclar_lista(lista_preguntas)
+else:
+    print("Error: no se pudo cargar preguntas.csv")
+
+datos_juego = {"puntuacion":0,"vidas":CANTIDAD_VIDAS,"nombre":"","tiempo_restante":CANTIDAD_TIEMPO,"indice":0,"volumen_musica":5, "racha":0, "volumen_sonidos":10, "musica_activada": True,"comodin_bomba":False, "comodin_puntos_X2":False, "comodin_doble_chance": False, "comodin_pasar_pregunta":False, "respuestas_a_mostrar":["respuesta_1","respuesta_2","respuesta_3", "respuesta_4"],"comodin_puntos_X2_usado": False, "comodin_pasar_pregunta_usado": False, "comodin_doble_chance_usado": False,"datos_guardados": False}
+
+
+
+corriendo = True
+reloj = pygame.time.Clock()
+evento_tiempo = pygame.USEREVENT
+pygame.time.set_timer(evento_tiempo,1000)
+
+bandera_musica_juego = False
+bandera_musica_terminado = False
+porcentaje_volumen_sonidos = datos_juego["volumen_sonidos"] / 100
+aplicar_volumen_sonidos(porcentaje_volumen_sonidos)
+
+lista_rankings = []
+
+ventana_actual = "menu"
+
+while corriendo:
+
+    reloj.tick(FPS)
+    cola_eventos = pygame.event.get()
+    if ventana_actual == "menu":
+        ventana_actual = mostrar_menu(pantalla,cola_eventos)
+    elif ventana_actual == "juego":
+        porcentaje_volumen_musica = datos_juego["volumen_musica"] / 100
+        if bandera_musica_juego == False:
+            pygame.mixer.music.load("musica.mp3")
+            pygame.mixer.music.set_volume(porcentaje_volumen_musica)
+            if datos_juego["musica_activada"]:
+                pygame.mixer.music.play(-1)
+            bandera_musica_juego = True
+        ventana_actual = mostrar_juego(pantalla, cola_eventos, datos_juego, lista_preguntas)
+    elif ventana_actual == "rankings":
+        ventana_actual = mostrar_rankings(pantalla,cola_eventos,datos_juego)
+    elif ventana_actual == "ajustes":
+        ventana_actual = mostrar_ajustes(pantalla,cola_eventos,datos_juego)
+    elif ventana_actual == "salir":
+        corriendo = False
+    elif ventana_actual == "terminado":
+        if bandera_musica_juego == True:
+            pygame.mixer.music.stop()
+            bandera_musica_juego= False
+        ventana_actual = mostrar_fin_juego(pantalla,cola_eventos,datos_juego,lista_rankings)
+        if ventana_actual == "menu" or ventana_actual == "juego":
+            reiniciar_estadisticas(datos_juego)
+            bandera_musica_juego = False
+
+
+    
+
+    
+    pygame.display.flip()
+
+pygame.display.quit()
+    
+
+    
