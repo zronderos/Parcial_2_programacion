@@ -1,0 +1,134 @@
+import pygame
+from Constantes import*
+from funciones import*
+
+
+pygame.init()
+pygame.display.set_caption("PREGUNTADOS")
+icono = pygame.image.load("brain.png")
+pygame.display.set_icon(icono)
+pantalla = pygame.display.set_mode(PANTALLA)
+fondo_pantalla = pygame.transform.scale(pygame.image.load("fondo.jpg"),PANTALLA)
+datos_juego = {"puntuacion":0,"vidas":CANTIDAD_VIDAS,"nombre":"","tiempo_restante":CANTIDAD_TIEMPO,"indice":0,"volumen_musica":5, "racha":0, "volumen_sonidos":10, "musica_activada": True,"comodin_bomba":False, "comodin_puntos_X2":False, "comodin_doble_chance": False, "comodin_pasar_pregunta":False, "respuestas_a_mostrar":["respuesta_1","respuesta_2","respuesta_3", "respuesta_4"],"comodin_puntos_X2_usado": False, "comodin_pasar_pregunta_usado": False, "comodin_doble_chance_usado": False,"datos_guardados": False}
+
+caja_pregunta = crear_elemento_juego("textura_pregunta.png", ANCHO_PREGUNTA, ALTO_PREGUNTA,30,20)
+lista_respuestas = crear_respuestas("textura_respuesta.png",ANCHO_BOTON, ALTO_BOTON,240,230,4)
+personaje = crear_elemento_juego("brain.png",170,170,10,320)
+boton_bomba = crear_elemento_juego("bomb.png",50,50,18,265)
+boton_pasar_pregunta = crear_elemento_juego("pasar.png",45,45,70,270)
+boton_puntos_X2 = crear_elemento_juego("X2.png",45,45,120,265)
+boton_doble_chance = crear_elemento_juego("doble_chance.png",45,45,180,265)
+textura_comodines = crear_elemento_juego("rectangle.png",230,150,10,220)
+
+#mezclar_lista(lista_preguntas)
+
+
+
+reloj = pygame.time.Clock()
+evento_tiempo = pygame.USEREVENT
+pygame.time.set_timer(evento_tiempo,1000)
+
+
+def mostrar_juego(pantalla:pygame.Surface,cola_eventos:list[pygame.event.Event],datos_juego:dict, lista_preguntas:list) -> str:
+    retorno = "juego"
+    pregunta_actual = lista_preguntas[datos_juego['indice']]
+
+    if datos_juego["vidas"] == 0 or datos_juego["tiempo_restante"] == 0:
+        GAME_OVER_SOUND.play()
+        retorno = "terminado"
+
+    for evento in cola_eventos:
+        if evento.type == pygame.QUIT:
+            retorno = "salir"
+        elif evento.type == pygame.MOUSEBUTTONDOWN:
+            if evento.button == 1:
+                if boton_bomba["rectangulo"].collidepoint(evento.pos):
+                    if datos_juego["comodin_bomba"] == False:
+                        CLICK_SONIDO.play()
+                        datos_juego["respuestas_a_mostrar"] = eliminar_dos_incorrectas(pregunta_actual)
+                        datos_juego["comodin_bomba"] = True
+                    else:
+                        ERROR_SONIDO.play()
+                elif boton_puntos_X2["rectangulo"].collidepoint(evento.pos):
+                    if datos_juego["comodin_puntos_X2"] == False and datos_juego["comodin_puntos_X2_usado"] == False:
+                        CLICK_SONIDO.play()
+                        datos_juego["comodin_puntos_X2"] = True
+                    else:
+                        ERROR_SONIDO.play()
+                elif boton_doble_chance["rectangulo"].collidepoint(evento.pos):
+                    if datos_juego["comodin_doble_chance"] == False and datos_juego["comodin_doble_chance_usado"] == False:
+                        CLICK_SONIDO.play()
+                        datos_juego["comodin_doble_chance"] = True
+                    else:
+                        ERROR_SONIDO.play()
+                        
+                elif boton_pasar_pregunta["rectangulo"].collidepoint(evento.pos):
+                    if datos_juego["comodin_pasar_pregunta"] == False and datos_juego["comodin_pasar_pregunta_usado"] == False:
+                        CLICK_SONIDO.play()
+                        pregunta_actual = saltar_pregunta(datos_juego,lista_preguntas,caja_pregunta,lista_respuestas)
+                    else:
+                        ERROR_SONIDO.play()
+
+                respuesta = obtener_respuesta_click(lista_respuestas,evento.pos)
+                if respuesta != None:
+                    if datos_juego["comodin_doble_chance"] == True and respuesta != pregunta_actual["respuesta_correcta"] :
+                        datos_juego["respuestas_a_mostrar"].remove(f"respuesta_{respuesta}")
+                        datos_juego["comodin_doble_chance"] = False
+                        datos_juego["comodin_doble_chance_usado"] = True
+                        continue
+
+                    if verificar_respuesta(datos_juego,pregunta_actual,respuesta) == True:
+                        if datos_juego["comodin_puntos_X2"] == True:            
+                            datos_juego["puntuacion"] += PUNTUACION_ACIERTO
+                            datos_juego["comodin_puntos_X2"] = False
+                            datos_juego["comodin_puntos_X2_usado"] = True
+
+                        CORRECTO_SONITO.play()
+
+                                         
+                    else:
+
+                        ERROR_SONIDO.play()
+
+                    datos_juego['indice'] += 1
+                    if datos_juego['indice'] == len(lista_preguntas):
+                        mezclar_lista(lista_preguntas)
+                        datos_juego['indice'] = 0
+
+                    datos_juego["respuestas_a_mostrar"] = ["respuesta_1", "respuesta_2", "respuesta_3", "respuesta_4"]       
+                    pregunta_actual = cambiar_pregunta(lista_preguntas,datos_juego['indice'],caja_pregunta,lista_respuestas)
+
+                       
+
+        elif evento.type == evento_tiempo:
+            datos_juego['tiempo_restante'] -= 1
+
+
+    pantalla.blit(fondo_pantalla,(0,0))
+    pantalla.blit(textura_comodines["superficie"],textura_comodines["rectangulo"])
+    pantalla.blit(caja_pregunta["superficie"],caja_pregunta["rectangulo"])
+    pantalla.blit(personaje["superficie"],personaje["rectangulo"])
+    pantalla.blit(boton_bomba["superficie"],boton_bomba["rectangulo"])
+    pantalla.blit(boton_pasar_pregunta["superficie"],boton_pasar_pregunta["rectangulo"])
+    pantalla.blit(boton_puntos_X2["superficie"],boton_puntos_X2["rectangulo"])
+    pantalla.blit(boton_doble_chance["superficie"],boton_doble_chance["rectangulo"])
+
+
+
+    for i in range(len(lista_respuestas)):
+        clave_respuesta = f"respuesta_{i + 1}"
+        if clave_respuesta in datos_juego["respuestas_a_mostrar"]:
+            pantalla.blit(lista_respuestas[i]["superficie"],lista_respuestas[i]["rectangulo"])
+            mostrar_texto(lista_respuestas[i]["superficie"],pregunta_actual[clave_respuesta],(20,20),FUENTE_RESPUESTA,COLOR_NEGRO)        
+
+
+    mostrar_texto(caja_pregunta["superficie"],pregunta_actual["pregunta"],(30,60),FUENTE_PREGUNTA,COLOR_NEGRO)
+    mostrar_texto(pantalla, f"VIDAS: {datos_juego['vidas']}",(10,10),FUENTE_TEXTO,COLOR_NEGRO)
+    mostrar_texto(pantalla, f"PUNTOS: {datos_juego['puntuacion']}",(395,10),FUENTE_TEXTO,COLOR_NEGRO)
+    mostrar_texto(pantalla, f"TIEMPO: {datos_juego['tiempo_restante']} s",(10,30),FUENTE_TEXTO,COLOR_NEGRO)
+
+    return retorno
+
+
+
+
